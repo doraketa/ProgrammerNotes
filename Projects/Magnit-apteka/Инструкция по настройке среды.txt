@@ -1,0 +1,191 @@
+
+1)установить docker
+https://docs.docker.com/engine/install/
+
+
+проверить можно при помощи 
+docker ps
+
+Если вылазит что-то типа:
+Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/containers/json": dial unix /var/run/docker.sock: connect: permission denied
+То три команды:
+sudo usermod -aG docker "${USER}"
+newgrp docker
+sudo service docker restart
+
+и снова
+docker ps
+
+2)установить docker-compose 
+https://docs.docker.com/compose/install/
+
+
+проверить можно при помощи 
+docker docker-compose -v
+
+
+
+
+3)Клонируем репозитории backend и frontend
+
+git clone git@gitlab.qsoft.ru:magnit-apteka/backend.git
+git clone git@gitlab.qsoft.ru:magnit-apteka/frontend.git
+
+
+
+БЭК
+
+1) Скачать архив Bitrix 
+
+https://my.qsoft.ru/disk/showFile/126887/?&ncc=1&ts=1615818825&filename=bitrix-2021-03-09.tar.gz
+
+распаковать bitrix в папку common/
+
+в папке common/ создать дирректорию upload 
+
+2) удалить файл local.env.php в common/bitrix/php_interface
+
+скачать файл local.env.php
+
+https://my.qsoft.ru/disk/showFile/126890/?&ncc=1&ts=1615819073&filename=local.env.php
+
+затем скопировать новый local.env.php в common/bitrix/php_interface
+
+
+
+3) переходим в папку проекта backend
+
+устанавливаем права для группы docker, делаем только в первый раз.
+(для того, чтобы работали эти команды, нужна папка deployer (из неё их и запускать), потому что:
+мы вынесли docker-compose и конфигурации контейнеров, composer.lock и composer.json, чтобы они в backend не попадали под коммит, если нам что-то нужно поменять для работы локально
+а так же нужно скопировать env.example:
+
+cp .env.example .env
+
+)
+
+make privilege
+
+exec su -l $USER
+
+(Внимание, после первой команды мы выйдем из директории deployer, надо снова туда зайти)
+
+Устанавливаем образ 
+make install
+
+делаем
+make stop
+
+запускаем 
+
+make install еще раз.
+
+
+
+
+Для запуска контейнеров используем
+
+make run
+
+
+Для остановки контейнеров используем
+
+make stop
+
+
+для перехода в контейнер используем
+
+make to-php
+
+
+
+
+Фронт
+
+
+1)Скопировать .env.example из корня в .env
+
+cp .env.example .env
+
+2) в файле .env
+
+заменить 
+API_SERVER_URL = "https://magnit.adv.ru"
+на
+API_SERVER_URL = "http://magnit.loc" или на тот хост, который вам выдали API_SERVER_URL = "http://172.27.2.45:порт"
+
+добавить
+RECAPTCHA_API_KEY="test"
+
+Если у вас windows: 
+1. В папке с проектом выполняем команду git config core.autocrlf false
+2. В папке  config/helpers.json указываем порт который находится в файле .env (API_SERVER_URL = "http://172.27.2.45:порт")
+3. В папке config/runtimeConfig.js указывает в константе localBaseURL = `http://172.27.2.45:${helpers.port}`
+
+
+3)добавить в etc/hosts
+127.0.0.1 magnit.loc kibana.magnit.loc rabbitmq.magnit.loc mailhog.magnit.loc
+
+
+4)установить yarn
+
+https://classic.yarnpkg.com/en/docs/install/#debian-stable
+
+Не нужно делать так:
+sudo apt install yarnpkg
+
+Надо так:
+sudo npm install -g yarn
+
+Если при установке yarn ошибка:
+
+checkPermissions Missing write access to /usr/local/lib
+npm ERR! code EACCES
+
+То делаем следующее:
+
+! Не используем sudo
+
+add following lines to ~/.bashrc after installing npm:
+
+npm set prefix ~/.npm
+PATH="$HOME/.npm/bin:$PATH"
+PATH="./node_modules/.bin:$PATH"
+
+Execute following line after changes:
+
+source ~/.bashrc
+
+
+5)запустить yarn
+
+затем запускаем
+
+yarn dev
+
+
+переходим по ссылке из консоли
+
+   │   Nuxt.js @ v2.14.7                      │
+   │                                          │
+   │   ▸ Environment: development             │
+   │   ▸ Rendering:   server-side             │
+   │   ▸ Target:      server                  │
+   │                                          │
+   │   Listening: http://172.27.6.133:8000/   │
+
+Если все разворачивали локально, то
+
+Админка (бек)
+http://magnit.loc/bitrix/admin/
+
+Фронт
+http://magnit.loc:8000/
+
+Если фронт собирается с ошибкой:
+Error: Node Sass does not yet support your current environment: Linux 64-bit with Unsupported runtime (88)
+
+То нужно понизить версию node.js до 10.16.0. Делается так:
+npm install -g n
+n 10.16.0
+(если не срабатывает, то попробовать из-под sudo хотя это неправильно)

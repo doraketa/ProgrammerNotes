@@ -1,0 +1,83 @@
+Нужно развернуть (можно даже на Винде) только фронт:
+
+## Настройка `frontend`
+
+1. Переименовать `.env.example` в `.env`
+2. В этом файле заменить строку
+
+    ```bash
+    API_SERVER_URL="https://magnit.adv.ru"
+    ```
+
+    На
+
+    ```bash
+    API_SERVER_URL="http://magnit.loc"
+    ```
+
+    А также
+
+    ```bash
+    DEV_NUM="9999"
+    ```
+
+    На
+
+    ```bash
+    DEV_NUM="8000"
+    ```
+
+    И добавить строку
+
+    ```bash
+    RECAPTCHA_API_KEY="test"
+    ```
+
+3. Обновить `node`
+
+    ```bash
+    sudo apt update && sudo apt -y upgrade && sudo apt -y install curl dirmngr apt-transport-https lsb-release ca-certificates && curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash - && sudo apt -y install nodejs
+    ```
+
+4. Установить зависимости
+
+    ```bash
+    yarn install
+    ```
+
+5. Обновить
+
+    ```bash
+    yarn
+    ```
+
+6. Запустить
+
+    ```bash
+    yarn dev
+    ```
+
+7. В /etc/hosts прописать
+
+127.0.0.1 localhost magnit.loc rabbitmq.magnit.loc
+
+При включенном VPN перед тем как выполнять yarn dev
+пропиши в .env файле
+
+вместо
+
+API_SERVER_URL = "http://magnit.loc"
+
+вот так:
+
+API_SERVER_URL = "http://172.27.2.45:8081"
+
+и потом
+
+yarn dev
+
+Если сработает нужен будет доступ по ssh для управления беком
+
+Последняя полная инструкция от Никиты:
+
+https://www.notion.so/07f7a794604e49eabf4b01951b207be3#0448e816bb7b4f1c850c13e2429c45f0
